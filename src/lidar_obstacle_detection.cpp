@@ -7,6 +7,8 @@
 
 #include "lidar_obstacle_detection.h"
 
+#include <utility>
+
 // 时间统计
 int64_t euclidean_time = 0.;
 int64_t total_time = 0.;
@@ -22,15 +24,15 @@ int64_t gtm()
 
 void publishCloud(
     const ros::Publisher *in_publisher, std_msgs::Header header,
-    const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_to_publish_ptr)
+    const pcl::PointCloud<pcl::PointXYZI>::Ptr& in_cloud_to_publish_ptr)
 {
   sensor_msgs::PointCloud2 cloud_msg;
   pcl::toROSMsg(*in_cloud_to_publish_ptr, cloud_msg);
-  cloud_msg.header = header;
+  cloud_msg.header = std::move(header);
   in_publisher->publish(cloud_msg);
 }
 
-lidarObstacleDetection::lidarObstacleDetection(ros::NodeHandle nh, ros::NodeHandle pnh)
+lidarObstacleDetection::lidarObstacleDetection(ros::NodeHandle nh, const ros::NodeHandle& pnh)
     : roi_clip_(nh, pnh), voxel_grid_filter_(nh, pnh), cluster_(nh, pnh), bounding_box_(pnh)
 {
   ros::Subscriber sub = nh.subscribe("/livox_horizon_points", 1, &lidarObstacleDetection::ClusterCallback, this);
@@ -44,7 +46,6 @@ lidarObstacleDetection::lidarObstacleDetection(ros::NodeHandle nh, ros::NodeHand
   _pub_clusters_message = nh.advertise<autoware_msgs::CloudClusterArray>("/detection/lidar_detector/cloud_clusters", 1);
   _pub_detected_objects = nh.advertise<autoware_msgs::DetectedObjectArray>("/detection/lidar_detector/objects", 1);
   _pub_cluster_visualize_markers = nh.advertise<visualization_msgs::MarkerArray>("/visualize/cluster_markers", 1);
-
   _pub_min_pose=nh.advertise<geometry_msgs::Pose>("/min_pose",1);
   ros::spin();
 }
@@ -62,10 +63,8 @@ void lidarObstacleDetection::ClusterCallback(
 
   pcl::fromROSMsg(*in_sensor_cloud, *in_cloud_ptr);
 
-  geometry_msgs::PoseArray poseArray{};
-  
   // 提取ROI，x,y,z范围
-  roi_clip_.GetROI(in_cloud_ptr, clip_cloud_ptr,poseArray);
+  roi_clip_.GetROI(in_cloud_ptr, clip_cloud_ptr,poses_);
 
   // 下采样，稀疏点云
   voxel_grid_filter_.downsample(clip_cloud_ptr, downsampled_cloud_ptr);

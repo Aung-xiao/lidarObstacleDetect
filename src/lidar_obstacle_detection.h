@@ -41,7 +41,7 @@
 class lidarObstacleDetection
 {
 public:
-  lidarObstacleDetection(ros::NodeHandle nh, ros::NodeHandle pnh);
+  lidarObstacleDetection(ros::NodeHandle nh, const ros::NodeHandle& pnh);
   ~lidarObstacleDetection(){};
 
   RoiClip roi_clip_;
@@ -68,6 +68,8 @@ public:
   ros::Publisher _pub_min_point;
 
   VisualizeDetectedObjects vdto;
+
+  std::vector<tf2::Vector3> poses_{};
 
 private:
   void ClusterCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);

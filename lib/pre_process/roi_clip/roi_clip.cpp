@@ -9,8 +9,7 @@ RoiClip::RoiClip(ros::NodeHandle node_handle, ros::NodeHandle private_node_handl
   private_node_handle.param("roi_y_max", roi_y_max_, 20.0);
   private_node_handle.param("roi_z_min", roi_z_min_, -1.75);
   private_node_handle.param("roi_z_max", roi_z_max_, 2.0);
-  // 转换到车辆坐标系下后，将车身点云切除，车辆坐标系中心为后轴中心０点
-  // 坐标系参数不确定，暂时不转换
+
   private_node_handle.param("vehicle_x_min", vehicle_x_min_, -1.2);
   private_node_handle.param("vehicle_x_max", vehicle_x_max_, 3.0);
   private_node_handle.param("vehicle_y_min", vehicle_y_min_, -1.0);
@@ -20,13 +19,13 @@ RoiClip::RoiClip(ros::NodeHandle node_handle, ros::NodeHandle private_node_handl
 }
 
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr RoiClip::GetROI(const pcl::PointCloud<pcl::PointXYZI>::Ptr& in,pcl::PointCloud<pcl::PointXYZI>::Ptr &out,geometry_msgs::PoseArray& pose_array)
+pcl::PointCloud<pcl::PointXYZI>::Ptr RoiClip::GetROI(const pcl::PointCloud<pcl::PointXYZI>::Ptr& in,pcl::PointCloud<pcl::PointXYZI>::Ptr &out,std::vector<tf2::Vector3> &poses)
 {
   pcl::PointCloud<pcl::PointXYZI>::Ptr clipVehicle = ClipVehicle(in);
-  pcl::PointCloud<pcl::PointXYZI>::Ptr clipArm = ClipArm(clipVehicle,pose_array);
-  if (!clipVehicle->points.empty())
+  pcl::PointCloud<pcl::PointXYZI>::Ptr clipArm = ClipArm(clipVehicle,poses);
+  if (!clipArm->points.empty())
   {
-    for (auto &p : clipVehicle->points)
+    for (auto &p : clipArm->points)
     {
       if (IsIn(p.x, roi_x_min_, roi_x_max_) && IsIn(p.y, roi_y_min_, roi_y_max_) && IsIn(p.z, roi_z_min_, roi_z_max_))
         out->push_back(p);
@@ -35,7 +34,6 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr RoiClip::GetROI(const pcl::PointCloud<pcl::
     return out;
 
   }
-
   ROS_ERROR("GetROI fail");
   return nullptr;
 }
@@ -57,18 +55,24 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr RoiClip::ClipVehicle(const pcl::PointCloud<
   return nullptr;
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr RoiClip::ClipArm(const pcl::PointCloud<pcl::PointXYZI>::Ptr& in,geometry_msgs::PoseArray& pose_array){
+pcl::PointCloud<pcl::PointXYZI>::Ptr RoiClip::ClipArm(const pcl::PointCloud<pcl::PointXYZI>::Ptr& in,std::vector<tf2::Vector3> &poses){
   if(!in->points.empty())
   {
     pcl::PointCloud<pcl::PointXYZI>::Ptr out(new pcl::PointCloud<pcl::PointXYZI>);
     for (auto &p : in->points)
     {
-      for(auto &pose: pose_array.poses)
+      if(poses.empty())
       {
-//        if (IsIn(p.x, pose.position.x, pose.position.x+0.1) && IsIn(p.y, pose.position.y, pose.position.y+0.1) && IsIn(p.z, pose.position.z, pose.position.z+0.1)){
-//
-//        }
-//        else out->push_back(p);
+        ROS_INFO("Get arm pose fail!\r\n");
+        out->push_back(p);
+      }
+      else{
+        for(auto &pose: poses)
+        {
+          if (IsIn(p.x, pose.x(), pose.x()+0.1) && IsIn(p.y, pose.y(), pose.y()+0.1) && IsIn(p.z, pose.z(), pose.z()+0.1)){
+          }
+          else out->push_back(p);
+        }
       }
     }
     return out;
