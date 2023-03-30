@@ -26,8 +26,8 @@
 #include "autoware_msgs/DetectedObjectArray.h"
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/version.hpp>
 
 #include "../lib/ground_detector/patchwork/patchwork.h"
@@ -41,34 +41,37 @@
 class lidarObstacleDetection
 {
 public:
-    lidarObstacleDetection(ros::NodeHandle nh, ros::NodeHandle pnh);
-    ~lidarObstacleDetection(){};
+  lidarObstacleDetection(ros::NodeHandle nh, ros::NodeHandle pnh);
+  ~lidarObstacleDetection(){};
 
-    RoiClip roi_clip_;
-    VoxelGridFilter voxel_grid_filter_;
-    PatchWork patch_work_;
-    EuclideanCluster cluster_;
+  RoiClip roi_clip_;
+  VoxelGridFilter voxel_grid_filter_;
+  PatchWork patch_work_;
+  EuclideanCluster cluster_;
 
-    BoundingBox bounding_box_;
-    VisualizeDetectedObjects vdo_;
+  BoundingBox bounding_box_;
+  VisualizeDetectedObjects vdo_;
 
-    ros::Publisher _pub_clip_cloud;
-    ros::Publisher _pub_ground_cloud;
-    ros::Publisher _pub_noground_cloud;
-    ros::Publisher _pub_cluster_cloud;
-    ros::Publisher _pub_clusters_message;
+  ros::Publisher _pub_clip_cloud;
+  ros::Publisher _pub_ground_cloud;
+  ros::Publisher _pub_down_cloud;
+  ros::Publisher _pub_noground_cloud;
+  ros::Publisher _pub_cluster_cloud;
+  ros::Publisher _pub_clusters_message;
 
-    ros::Publisher _pub_detected_objects;
-    ros::Publisher _pub_detected_3Dobjects;
+  ros::Publisher _pub_detected_objects;
+  ros::Publisher _pub_detected_3Dobjects;
 
-    ros::Publisher _pub_cluster_visualize_markers;
-    ros::Publisher _pub_3Dobjects_visualize_markers;
+  ros::Publisher _pub_cluster_visualize_markers;
+  ros::Publisher _pub_3Dobjects_visualize_markers;
+  ros::Publisher _pub_min_pose;
+  ros::Publisher _pub_min_point;
 
-    VisualizeDetectedObjects vdto;
+  VisualizeDetectedObjects vdto;
 
 private:
-    void ClusterCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
-    void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters, autoware_msgs::DetectedObjectArray &detected_objects);
+  void ClusterCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
+  void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters, autoware_msgs::DetectedObjectArray &detected_objects);
 };
 
 #endif
