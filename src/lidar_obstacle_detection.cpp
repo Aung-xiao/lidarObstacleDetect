@@ -62,8 +62,10 @@ void lidarObstacleDetection::ClusterCallback(
 
   pcl::fromROSMsg(*in_sensor_cloud, *in_cloud_ptr);
 
+  geometry_msgs::PoseArray poseArray{};
+  
   // 提取ROI，x,y,z范围
-  roi_clip_.GetROI(in_cloud_ptr, clip_cloud_ptr);
+  roi_clip_.GetROI(in_cloud_ptr, clip_cloud_ptr,poseArray);
 
   // 下采样，稀疏点云
   voxel_grid_filter_.downsample(clip_cloud_ptr, downsampled_cloud_ptr);
