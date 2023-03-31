@@ -1,15 +1,12 @@
 #include "lidar_obstacle_detection.h"
 #include <utility>
 
-// 时间统计
-int64_t euclidean_time = 0.;
-int64_t total_time = 0.;
-int counter = 0;
+#define pi 3.14
 
 int64_t gtm()
 {
-  struct timeval tm;
-  gettimeofday(&tm, 0);
+  struct timeval tm{};
+  gettimeofday(&tm, nullptr);
   int64_t re = (((int64_t)tm.tv_sec) * 1000 * 1000 + tm.tv_usec);
   return re;
 }
@@ -24,13 +21,23 @@ void publishCloud(
   in_publisher->publish(cloud_msg);
 }
 
+Eigen::Matrix<double, 4, 4> T_param(double theta, double d, double a,
+                                                            double alpha)
+{
+  Eigen::Matrix<double, 4, 4> T;
+  T<<cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha) ,  a*cos(theta),
+      sin(theta), cos(theta)*cos(alpha) , -cos(theta)*sin(alpha), a*sin(theta),
+      0         , sin(alpha)            , cos(alpha)            , d           ,
+      0         , 0                     , 0                     , 1           ;
+  return T;
+}
+
+
 lidarObstacleDetection::lidarObstacleDetection(ros::NodeHandle nh, const ros::NodeHandle& pnh)
     : roi_clip_(nh, pnh), voxel_grid_filter_(nh, pnh), cluster_(nh, pnh), bounding_box_(pnh)
 {
-  ros::Subscriber sub = nh.subscribe("/livox_horizon_points", 1, &lidarObstacleDetection::ClusterCallback, this);
-  ///livox_horizon_points
-  ///livox/lidar
-
+  ros::Subscriber lidar_sub = nh.subscribe("/livox_horizon_points", 1, &lidarObstacleDetection::ClusterCallback, this);
+  ros::Subscriber arm_sub=nh.subscribe("/arm_theta", 1, &lidarObstacleDetection::ArmThetaCallback, this);
   _pub_clip_cloud = nh.advertise<sensor_msgs::PointCloud2>("/points_clip", 1);
   _pub_down_cloud = nh.advertise<sensor_msgs::PointCloud2>("/points_down", 1);
   _pub_noground_cloud= nh.advertise<sensor_msgs::PointCloud2>("/points_noground", 1);
@@ -138,13 +145,23 @@ void lidarObstacleDetection::publishDetectedObjects(
   _pub_min_pose.publish(min_pose);
 }
 
-Eigen::Matrix<double, 4, 4> lidarObstacleDetection::T_param(double theta, double d, double a,
-                                                     double alpha)
+void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud)
 {
-  Eigen::Matrix<double, 4, 4> T;
-  T<<cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha) , a*cos(theta),
-     sin(theta), cos(theta)*cos(alpha) , -cos(theta)*sin(alpha), a*sin(theta),
-     0         , sin(alpha)            , cos(alpha)            , d           ,
-     0         , 0                     , 0                     , 1           ;
-  return T;
+  std::vector<double> a={0, -0.42500, -0.39225, 0, 0, 0};
+  std::vector<double> d={0.089159, 0, 0, 0.10915, 0.09465, 0.08230};
+  std::vector<double> alpha={pi/2, 0, 0, pi/2, -pi/2, 0};
+  std::vector<double> theta={pi/2, 0, 0, pi/2, -pi/2, 0};
+  poses_.clear();
+
+  Eigen::Matrix<double, 4, 4>T01= T_param(theta[0],d[0],a[0],alpha[0]);
+  Eigen::Matrix<double, 4, 4>T12= T_param(theta[1],d[1],a[1],alpha[1]);
+  Eigen::Matrix<double, 4, 4>T23= T_param(theta[2],d[2],a[2],alpha[2]);
+  Eigen::Matrix<double, 4, 4>T34= T_param(theta[3],d[3],a[3],alpha[3]);
+  Eigen::Matrix<double, 4, 4>T45= T_param(theta[4],d[4],a[4],alpha[4]);
+  Eigen::Matrix<double, 4, 4>T56= T_param(theta[5],d[5],a[5],alpha[5]);
+
+  Eigen::Matrix<double, 4, 4>T06=T01*T12*T23*T34*T45*T56;
+  tf2::Vector3 pose={T06(0,3),T06(1,3),T06(2,3)};
+  poses_.push_back(pose);
 }
+

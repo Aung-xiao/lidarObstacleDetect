@@ -38,7 +38,7 @@ class lidarObstacleDetection
 {
 public:
   lidarObstacleDetection(ros::NodeHandle nh, const ros::NodeHandle& pnh);
-  ~lidarObstacleDetection(){};
+  ~lidarObstacleDetection()= default;;
 
   RoiClip roi_clip_;
   VoxelGridFilter voxel_grid_filter_;
@@ -67,10 +67,11 @@ public:
 
   std::vector<tf2::Vector3> poses_{};
 
+
 private:
   void ClusterCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
+  void ArmThetaCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
   void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters, autoware_msgs::DetectedObjectArray &detected_objects);
-  static Eigen::Matrix<double, 4, 4> T_param(double theta,double d,double a,double alpha);
 };
 
 #endif
