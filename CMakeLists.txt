@@ -26,6 +26,15 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
 )
 
+
+find_package(catkin REQUIRED COMPONENTS
+        cmake_modules
+        )
+
+find_package(Eigen REQUIRED)
+
+include_directories(${Eigen_INCLUDE_DIRS})  #添加3
+
 # 添加子目录并构建
 add_subdirectory(lib/pre_process/roi_clip)
 add_subdirectory(lib/pre_process/voxel_grid_filter)

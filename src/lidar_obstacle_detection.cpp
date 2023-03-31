@@ -1,12 +1,4 @@
-/*
- * @Author: xiaohu
- * @Date: 2022-04-02 00:26:55
- * @Last Modified by: xiaohu
- * @Last Modified time: 2022-04-02 01:12:59
- */
-
 #include "lidar_obstacle_detection.h"
-
 #include <utility>
 
 // 时间统计
@@ -144,4 +136,15 @@ void lidarObstacleDetection::publishDetectedObjects(
   min_pose=in_clusters.clusters[min_i].bounding_box.pose;
   _pub_detected_objects.publish(detected_objects);
   _pub_min_pose.publish(min_pose);
+}
+
+Eigen::Matrix<double, 4, 4> lidarObstacleDetection::T_param(double theta, double d, double a,
+                                                     double alpha)
+{
+  Eigen::Matrix<double, 4, 4> T;
+  T<<cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha) , a*cos(theta),
+     sin(theta), cos(theta)*cos(alpha) , -cos(theta)*sin(alpha), a*sin(theta),
+     0         , sin(alpha)            , cos(alpha)            , d           ,
+     0         , 0                     , 0                     , 1           ;
+  return T;
 }

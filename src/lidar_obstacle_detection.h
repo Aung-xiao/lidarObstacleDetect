@@ -1,10 +1,3 @@
-/*
- * @Author: xiaohu
- * @Date: 2022-04-02 00:26:55
- * @Last Modified by: xiaohu
- * @Last Modified time: 2022-04-02 01:12:59
- */
-
 #ifndef LIDAR_DETECTION_TRACK_H_
 #define LIDAR_DETECTION_TRACK_H_
 
@@ -37,6 +30,9 @@
 #include "../lib/pre_process/voxel_grid_filter/voxel_grid_filter.h"
 #include "../lib/bounding_box/bounding_box.h"
 #include "../lib/visualization/visualize_detected_objects.h"
+
+#include <Eigen/Eigen>
+#include <ctgmath>
 
 class lidarObstacleDetection
 {
@@ -74,6 +70,7 @@ public:
 private:
   void ClusterCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
   void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters, autoware_msgs::DetectedObjectArray &detected_objects);
+  static Eigen::Matrix<double, 4, 4> T_param(double theta,double d,double a,double alpha);
 };
 
 #endif
