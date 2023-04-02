@@ -147,7 +147,7 @@ void lidarObstacleDetection::publishDetectedObjects(
 
 void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud)
 {
-  tfBroadcaster();
+
   std::vector<double> a={0, -0.42500, -0.39225, 0, 0, 0};
   std::vector<double> d={0.089159, 0, 0, 0.10915, 0.09465, 0.08230};
   std::vector<double> alpha={pi/2, 0, 0, pi/2, -pi/2, 0};
@@ -163,17 +163,26 @@ void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2Cons
 
   Eigen::Matrix<double, 4, 4>T06=T01*T12*T23*T34*T45*T56;
   tf2::Vector3 pose={T06(0,3),T06(1,3),T06(2,3)};
+  tfBroadcaster(pose);
   poses_.push_back(pose);
 
 }
 
-void lidarObstacleDetection::tfBroadcaster()
+void lidarObstacleDetection::tfBroadcaster(tf2::Vector3 pose)
 {
-  static tf::TransformBroadcaster br;
-  tf::Transform transform;
-  transform.setOrigin( tf::Vector3(10,10, 10.0) );
-  tf::Quaternion q;
+  static tf2_ros::TransformBroadcaster br;
+  geometry_msgs::TransformStamped transformStamped;
+  transformStamped.header.stamp = ros::Time::now();
+  transformStamped.header.frame_id = "odom";
+  transformStamped.child_frame_id = "test";
+  transformStamped.transform.translation.x = pose.x();
+  transformStamped.transform.translation.y = pose.y();
+  transformStamped.transform.translation.z = pose.z();
+  tf2::Quaternion q;
   q.setRPY(0, 0, 0);
-  transform.setRotation(q);
-  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "odom", "test"));
+  transformStamped.transform.rotation.x = q.x();
+  transformStamped.transform.rotation.y = q.y();
+  transformStamped.transform.rotation.z = q.z();
+  transformStamped.transform.rotation.w = q.w();
+  br.sendTransform(transformStamped);
 }
