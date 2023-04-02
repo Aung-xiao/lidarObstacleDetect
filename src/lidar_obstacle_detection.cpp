@@ -151,7 +151,7 @@ void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2Cons
   std::vector<double> a={0, -0.42500, -0.39225, 0, 0, 0};
   std::vector<double> d={0.089159, 0, 0, 0.10915, 0.09465, 0.08230};
   std::vector<double> alpha={pi/2, 0, 0, pi/2, -pi/2, 0};
-  std::vector<double> theta={pi/2, 0, 0, pi/2, -pi/2, 0};
+  std::vector<double> theta={0, 0, 0, 0, 0, 0};
   poses_.clear();
 
   Eigen::Matrix<double, 4, 4>T01= T_param(theta[0],d[0],a[0],alpha[0]);
@@ -163,18 +163,20 @@ void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2Cons
 
   Eigen::Matrix<double, 4, 4>T06=T01*T12*T23*T34*T45*T56;
   tf2::Vector3 pose={T06(0,3),T06(1,3),T06(2,3)};
-  tfBroadcaster(pose);
+  std::string frame_name="test";
+  tfBroadcaster(pose,frame_name);
   poses_.push_back(pose);
 
 }
 
-void lidarObstacleDetection::tfBroadcaster(tf2::Vector3 pose)
+void lidarObstacleDetection::tfBroadcaster(tf2::Vector3 pose,std::string frame_name)
 {
+  int i=1;
   static tf2_ros::TransformBroadcaster br;
   geometry_msgs::TransformStamped transformStamped;
   transformStamped.header.stamp = ros::Time::now();
   transformStamped.header.frame_id = "odom";
-  transformStamped.child_frame_id = "test";
+  transformStamped.child_frame_id = frame_name+std::to_string(i);
   transformStamped.transform.translation.x = pose.x();
   transformStamped.transform.translation.y = pose.y();
   transformStamped.transform.translation.z = pose.z();

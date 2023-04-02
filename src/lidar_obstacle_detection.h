@@ -75,7 +75,7 @@ public:
 private:
   void ClusterCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
   void ArmThetaCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud);
-  static void tfBroadcaster(tf2::Vector3 pose);
+  static void tfBroadcaster(tf2::Vector3 pose,std::string frame_name);
   void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters, autoware_msgs::DetectedObjectArray &detected_objects);
 };
 
