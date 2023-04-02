@@ -266,6 +266,150 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        axle_link:
+          Value: true
+        base:
+          Value: true
+        base_link:
+          Value: true
+        base_link_inertia:
+          Value: true
+        chassis_link:
+          Value: true
+        flange:
+          Value: true
+        forearm_link:
+          Value: true
+        front_cover_link:
+          Value: true
+        front_laser:
+          Value: true
+        front_left_wheel_link:
+          Value: true
+        front_lights_link:
+          Value: true
+        front_right_wheel_link:
+          Value: true
+        front_rocker_link:
+          Value: true
+        imu_link:
+          Value: true
+        laser_livox_mini360:
+          Value: true
+        left_side_cover_link:
+          Value: true
+        lidar:
+          Value: true
+        livox_mini360:
+          Value: true
+        map:
+          Value: true
+        mid_mount:
+          Value: true
+        odom:
+          Value: true
+        platform_base:
+          Value: true
+        rear_cover_link:
+          Value: true
+        rear_left_wheel_link:
+          Value: true
+        rear_lights_link:
+          Value: true
+        rear_right_wheel_link:
+          Value: true
+        rear_rocker_link:
+          Value: true
+        ridgeback::base_link:
+          Value: true
+        right_side_cover_link:
+          Value: true
+        shoulder_link:
+          Value: true
+        test:
+          Value: true
+        tool0:
+          Value: true
+        top_link:
+          Value: true
+        upper_arm_link:
+          Value: true
+        ur5_base_link:
+          Value: true
+        wrist_1_link:
+          Value: true
+        wrist_2_link:
+          Value: true
+        wrist_3_link:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          odom:
+            base_link:
+              chassis_link:
+                axle_link:
+                  front_rocker_link:
+                    front_left_wheel_link:
+                      {}
+                    front_right_wheel_link:
+                      {}
+                  rear_rocker_link:
+                    rear_left_wheel_link:
+                      {}
+                    rear_right_wheel_link:
+                      {}
+                front_cover_link:
+                  {}
+                front_laser:
+                  {}
+                front_lights_link:
+                  {}
+                imu_link:
+                  {}
+                left_side_cover_link:
+                  {}
+                rear_cover_link:
+                  {}
+                rear_lights_link:
+                  {}
+                right_side_cover_link:
+                  {}
+                top_link:
+                  {}
+              mid_mount:
+                lidar:
+                  platform_base:
+                    livox_mini360:
+                      laser_livox_mini360:
+                        {}
+                ur5_base_link:
+                  base:
+                    {}
+                  base_link_inertia:
+                    shoulder_link:
+                      upper_arm_link:
+                        forearm_link:
+                          wrist_1_link:
+                            wrist_2_link:
+                              wrist_3_link:
+                                flange:
+                                  tool0:
+                                    {}
+            test:
+              {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -294,7 +438,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.732419967651367
+      Distance: 5.428189754486084
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -310,9 +454,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6497972011566162
+      Pitch: 0.6747971773147583
       Target Frame: <Fixed Frame>
-      Yaw: 1.2490521669387817
+      Yaw: 1.3040521144866943
     Saved: ~
 Window Geometry:
   Displays:
@@ -331,4 +475,4 @@ Window Geometry:
     collapsed: false
   Width: 1386
   X: 151
-  Y: 277
+  Y: 240

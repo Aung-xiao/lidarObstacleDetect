@@ -37,7 +37,7 @@ lidarObstacleDetection::lidarObstacleDetection(ros::NodeHandle nh, const ros::No
     : roi_clip_(nh, pnh), voxel_grid_filter_(nh, pnh), cluster_(nh, pnh), bounding_box_(pnh)
 {
   ros::Subscriber lidar_sub = nh.subscribe("/livox_horizon_points", 1, &lidarObstacleDetection::ClusterCallback, this);
-  ros::Subscriber arm_sub=nh.subscribe("/arm_theta", 1, &lidarObstacleDetection::ArmThetaCallback, this);
+  ros::Subscriber arm_sub=nh.subscribe("/livox_horizon_points", 1, &lidarObstacleDetection::ArmThetaCallback, this);
   _pub_clip_cloud = nh.advertise<sensor_msgs::PointCloud2>("/points_clip", 1);
   _pub_down_cloud = nh.advertise<sensor_msgs::PointCloud2>("/points_down", 1);
   _pub_noground_cloud= nh.advertise<sensor_msgs::PointCloud2>("/points_noground", 1);
@@ -147,6 +147,7 @@ void lidarObstacleDetection::publishDetectedObjects(
 
 void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2ConstPtr &in_sensor_cloud)
 {
+  tfBroadcaster();
   std::vector<double> a={0, -0.42500, -0.39225, 0, 0, 0};
   std::vector<double> d={0.089159, 0, 0, 0.10915, 0.09465, 0.08230};
   std::vector<double> alpha={pi/2, 0, 0, pi/2, -pi/2, 0};
@@ -163,5 +164,16 @@ void lidarObstacleDetection::ArmThetaCallback(const sensor_msgs::PointCloud2Cons
   Eigen::Matrix<double, 4, 4>T06=T01*T12*T23*T34*T45*T56;
   tf2::Vector3 pose={T06(0,3),T06(1,3),T06(2,3)};
   poses_.push_back(pose);
+
 }
 
+void lidarObstacleDetection::tfBroadcaster()
+{
+  static tf::TransformBroadcaster br;
+  tf::Transform transform;
+  transform.setOrigin( tf::Vector3(10,10, 10.0) );
+  tf::Quaternion q;
+  q.setRPY(0, 0, 0);
+  transform.setRotation(q);
+  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "odom", "test"));
+}
